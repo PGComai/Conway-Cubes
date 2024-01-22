@@ -1,0 +1,127 @@
+[gd_scene load_steps=16 format=3 uid="uid://blugoj0tg77rb"]
+
+[ext_resource type="Script" path="res://scripts/World.gd" id="1_oqtum"]
+[ext_resource type="Shader" path="res://textures/cubes.gdshader" id="2_ux8im"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_by6es"]
+viewport_path = NodePath("SubViewport")
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_7ljyi"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_4m7b6"]
+sky_material = SubResource("ProceduralSkyMaterial_7ljyi")
+
+[sub_resource type="Environment" id="Environment_27rrv"]
+background_mode = 1
+sky = SubResource("Sky_4m7b6")
+ambient_light_source = 2
+ambient_light_color = Color(0.34902, 0.34902, 0.34902, 1)
+tonemap_mode = 2
+sdfgi_use_occlusion = true
+
+[sub_resource type="Texture3DRD" id="Texture3DRD_12lf3"]
+
+[sub_resource type="Curve" id="Curve_ae8y2"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.246637, 1), 0.0, 0.0, 0, 0, Vector2(0.753363, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_4bf70"]
+curve = SubResource("Curve_ae8y2")
+
+[sub_resource type="Gradient" id="Gradient_t4d7e"]
+offsets = PackedFloat32Array(0.398907, 0.655738)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_isgh3"]
+noise_type = 4
+frequency = 0.0839
+fractal_weighted_strength = 1.0
+cellular_jitter = 0.0
+cellular_return_type = 0
+domain_warp_amplitude = 3.77
+domain_warp_frequency = 17.36
+domain_warp_fractal_octaves = 1
+metadata/_preview_in_3d_space_ = true
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_tvhx1"]
+seamless = true
+seamless_blend_skirt = 0.444
+color_ramp = SubResource("Gradient_t4d7e")
+noise = SubResource("FastNoiseLite_isgh3")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_c1ld7"]
+shader = ExtResource("2_ux8im")
+shader_parameter/cube_texture = SubResource("Texture3DRD_12lf3")
+shader_parameter/test_noise = SubResource("NoiseTexture3D_tvhx1")
+shader_parameter/scale_curve = SubResource("CurveTexture_4bf70")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dvpiy"]
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_43bkl"]
+material = SubResource("StandardMaterial3D_dvpiy")
+
+[node name="UX" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="PanelContainerL" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+texture = SubResource("ViewportTexture_by6es")
+expand_mode = 2
+
+[node name="PanelContainerR" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SubViewport" type="SubViewport" parent="."]
+
+[node name="World" type="Node3D" parent="SubViewport"]
+script = ExtResource("1_oqtum")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport/World"]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewport/World"]
+environment = SubResource("Environment_27rrv")
+
+[node name="GridMap" type="GridMap" parent="SubViewport/World"]
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="SubViewport/World"]
+emitting = false
+amount = 262144
+lifetime = 0.01
+explosiveness = 1.0
+fixed_fps = 60
+interpolate = false
+visibility_aabb = AABB(-33, -33, -33, 65, 65, 65)
+process_material = SubResource("ShaderMaterial_c1ld7")
+draw_pass_1 = SubResource("BoxMesh_43bkl")
+
+[node name="CamH" type="Node3D" parent="SubViewport/World"]
+
+[node name="CamV" type="Node3D" parent="SubViewport/World/CamH"]
+
+[node name="Camera3D" type="Camera3D" parent="SubViewport/World/CamH/CamV"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 77)

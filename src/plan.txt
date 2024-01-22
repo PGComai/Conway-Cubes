@@ -1,0 +1,2 @@
+unless selection mode, cubes are rendered as particles
+which means all cubes must "be there" and appear according to cubemap
